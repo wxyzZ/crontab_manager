@@ -1,0 +1,56 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Go
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        type: string
+        required: true
+        default: "0.0.1"
+  push:
+    branches:
+      - main
+
+      
+jobs:
+ Build_Web:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.20'
+
+    - name: Build
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v ./... -o crontab_manager
+      
+        
+    - name: Upload Artifact
+      uses: nanoufo/action-upload-artifacts-and-release-assets@v2
+      with:
+        path: |
+           crontab_manager
+  
+ GitHub_Release:
+    runs-on: ubuntu-22.04
+    needs: [Build_Web] 
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: builds/
+    - name: Upload Release
+      uses: softprops/action-gh-release@v1
+      with:
+        prerelease: true
+        tag_name:  'v1.0.0' 
+        files: |
+          builds/*
