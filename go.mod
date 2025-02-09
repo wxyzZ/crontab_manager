@@ -1,4 +1,4 @@
-module gocron2
+module crontab_manager
 
 go 1.22.5
 
